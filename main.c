@@ -141,6 +141,23 @@ int 	ft_mouse(int x, int y, t_fractol *params)
 	return (0);
 }
 
+void	ft_make_threads(t_fractol *params)
+{
+	pthread_t	threads[THREADS];
+	t_calc		calculations[THREADS];
+	int 		i;
+
+	i = -1;
+	while (++i < HEIGHT)
+	{
+		calculations[i].params = params;
+		calculations[i].start_pos = i * WIDTH;
+		calculations[i].conts_img = params->min_img + i * params->step_img;
+		//TODO: some_func
+		pthread_create(&threads[i % THREADS], NULL, (void *(*)(void *))some_func, (void *)&calculations[i]);
+	}
+}
+
 void	init_fractol(t_fractol *params, char *str)
 {
 	ft_bzero(params, sizeof(t_fractol));
@@ -151,10 +168,22 @@ void	init_fractol(t_fractol *params, char *str)
 												&params->size_line, &params->endian);
 	params->d_real_julia = -0.4;
 	params->d_img_julia = 0.6;
+	params->min_img = -1.5;
+	params->max_img = 1.5;
+	params->zoom = 1.0;
 	if (ft_strcmp(str, "m") == 0)
+	{
 		params->type = mand;
+		params->min_real = -2;
+		params->max_real = 1;
+	}
 	else if (ft_strcmp(str, "j") == 0)
+	{
 		params->type = julia;
+		params->min_real = -1.5;
+		params->max_real = 1.5;
+		params->is_julia = 1;
+	}
 }
 
 bool	ft_incorrect_arg(char *str)
@@ -172,12 +201,8 @@ int		main(int ac, char **av)
 		|| (ft_incorrect_arg(av[1]) && ft_printf("Incorrect arg!\n")))
 		return (0);
 	init_fractol(&all_params, av[1]);
+	ft_make_threads(&all_params);
 
-
-	if (ft_strcmp(av[1], "m") == 0)
-		calc_mandelbrot(&all_params, mand);
-	else if (ft_strcmp(av[1], "j") == 0)
-		calc_mandelbrot(&all_params, julia);
 	mlx_put_image_to_window(all_params.mlx, all_params.win, all_params.image, 0, 0);
 	mlx_mouse_hook(all_params.win, ft_mouse_zoom, &all_params);
 	mlx_hook(all_params.win, 2, 5, ft_fractol_hooks, &all_params);

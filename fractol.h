@@ -17,12 +17,12 @@
 # include "minilibx_macos/mlx.h"
 # include <stdio.h>
 # include <stdbool.h>
+# include <pthread.h>
 
 # define WIDTH		800
 # define HEIGHT		800
 # define MAX_ITER	50
-# define HORIZONTAL_SPLIT 2
-# define VERTICAL_SPLIT 3
+# define THREADS 	4
 
 typedef enum	e_fractol_type
 {
@@ -42,19 +42,28 @@ typedef struct		s_fractol
 	int				endian;
 	double			d_real_julia;
 	double			d_img_julia;
+	bool			is_julia;
 	t_fractol_type	type;
+
+	double			min_real;
+	double			max_real;
+	double			min_img;
+	double			max_img;
+
+	double 			step_real;
+	double			step_img;
+	double			zoom;
+	double			shift_real;
+	double			shift_img;
 }					t_fractol;
 
-typedef struct	s_mandelbrot_calculation
+typedef struct	s_calc
 {
-	double		min_real;
-	double		max_real;
-	double		min_img;
-	double		max_img;
-	double		step_real;
-	double		step_img;
+	t_fractol	*params;
+	int 		start_pos;
+	double		conts_img;
 
-}				t_mandelbrot_calculation;
+}				t_calc;
 
 
 
