@@ -27,13 +27,13 @@ int		ft_fractol_hooks(int key, t_fractol *params)
 	return (0);
 }
 
-float	ft_mandelbrot_iterations(float x, float y)
+double	ft_mandelbrot_iterations(double x, double y)
 {
 	int		i;
-	float	x_new;
-	float	y_new;
-	float	x_saved;
-	float	y_saved;
+	double	x_new;
+	double	y_new;
+	double	x_saved;
+	double	y_saved;
 
 	i = -1;
 	x_saved = x;
@@ -43,18 +43,18 @@ float	ft_mandelbrot_iterations(float x, float y)
 		x_new = x * x;
 		y_new = y * y;
 		if (x_new + y_new > 4)
-			return ((float)i / 50);
+			return ((double)i / 50);
 		y = 2 * x * y + y_saved;
 		x = x_new - y_new + x_saved;
 	}
 	return (1.0);
 }
 
-float	ft_julia_iterations(float x, float y, t_fractol *params)
+double	ft_julia_iterations(double x, double y, t_fractol *params)
 {
 	int		i;
-	float	x_new;
-	float	y_new;
+	double	x_new;
+	double	y_new;
 
 	i = -1;
 	while (++i < MAX_ITER)
@@ -62,14 +62,14 @@ float	ft_julia_iterations(float x, float y, t_fractol *params)
 		x_new = x * x;
 		y_new = y * y;
 		if (x_new + y_new > 4)
-			return ((float)i / 50);
-		y = 2 * x * y + params->d_img;
-		x = x_new - y_new + params->d_real;
+			return ((double)i / 50);
+		y = 2 * x * y + params->d_img_julia;
+		x = x_new - y_new + params->d_real_julia;
 	}
 	return (1.0);
 }
 
-void	init_base_mandelbrot(t_mandelbrot_calculation *calc, enum e_fractol_type type)
+void	init_base_mandelbrot(t_mandelbrot_calculation *calc, t_fractol_type type)
 {
 	ft_bzero(calc, sizeof(t_mandelbrot_calculation));
 	calc->min_img = -1.5;
@@ -88,7 +88,7 @@ void	init_base_mandelbrot(t_mandelbrot_calculation *calc, enum e_fractol_type ty
 	calc->step_img = (calc->max_img - calc->min_img) / (HEIGHT - 1);
 }
 
-void	calc_mandelbrot(t_fractol *params, enum e_fractol_type type)
+void	calc_mandelbrot(t_fractol *params, t_fractol_type type)
 {
 	int							i;
 	int							j;
@@ -118,25 +118,6 @@ void	calc_mandelbrot(t_fractol *params, enum e_fractol_type type)
 	}
 }
 
-void	init_fractol(t_fractol *params)
-{
-	ft_bzero(params, sizeof(t_fractol));
-	params->mlx = mlx_init();
-	params->win = mlx_new_window(params->mlx, WIDTH, HEIGHT, "Fract'ol");
-	params->image = mlx_new_image(params->mlx, WIDTH, HEIGHT);
-	params->image_src = (int*)mlx_get_data_addr(params->image, &params->bpp,
-			&params->size_line, &params->endian);
-	params->d_img = 0.6;
-	params->d_real = -0.4;
-}
-
-bool	ft_incorrect_arg(char *str)
-{
-	if (ft_strcmp(str, "m") && ft_strcmp(str, "j"))
-		return (1);
-	return (0);
-}
-
 int 	ft_mouse_zoom(int key, int x, int y, t_fractol *params)
 {
 	(void)key;
@@ -151,34 +132,58 @@ int 	ft_mouse(int x, int y, t_fractol *params)
 {
 	if (x > 0 && x < WIDTH && y > 0 && y < HEIGHT)
 	{
-		params->d_real = -1.8 + (double)x / WIDTH * 2.4;
-		params->d_img = -0.4 + (double)y / WIDTH * 2.0;
+		params->d_real_julia = -1.8 + (double)x / WIDTH * 2.4;
+		params->d_img_julia = -0.4 + (double)y / WIDTH * 2.0;
 		mlx_clear_window(params->mlx, params->win);
-		calc_mandelbrot(params, 1);
+		calc_mandelbrot(params, julia);
 		mlx_put_image_to_window(params->mlx, params->win, params->image, 0, 0);
 	}
 	return (0);
 }
 
+void	init_fractol(t_fractol *params, char *str)
+{
+	ft_bzero(params, sizeof(t_fractol));
+	params->mlx = mlx_init();
+	params->win = mlx_new_window(params->mlx, WIDTH, HEIGHT, "Fract'ol");
+	params->image = mlx_new_image(params->mlx, WIDTH, HEIGHT);
+	params->image_src = (int*)mlx_get_data_addr(params->image, &params->bpp,
+												&params->size_line, &params->endian);
+	params->d_real_julia = -0.4;
+	params->d_img_julia = 0.6;
+	if (ft_strcmp(str, "m") == 0)
+		params->type = mand;
+	else if (ft_strcmp(str, "j") == 0)
+		params->type = julia;
+}
+
+bool	ft_incorrect_arg(char *str)
+{
+	if (ft_strcmp(str, "m") && ft_strcmp(str, "j"))
+		return (1);
+	return (0);
+}
+
 int		main(int ac, char **av)
 {
-	t_fractol	params;
+	t_fractol	all_params;
 
-	(void)av;
 	if ((ac < 2 && ft_printf("No args, sorry\n"))
 		|| (ft_incorrect_arg(av[1]) && ft_printf("Incorrect arg!\n")))
 		return (0);
-	init_fractol(&params);
+	init_fractol(&all_params, av[1]);
+
+
 	if (ft_strcmp(av[1], "m") == 0)
-		calc_mandelbrot(&params, 0);
+		calc_mandelbrot(&all_params, mand);
 	else if (ft_strcmp(av[1], "j") == 0)
-		calc_mandelbrot(&params, 1);
-	mlx_put_image_to_window(params.mlx, params.win, params.image, 0, 0);
-	mlx_mouse_hook(params.win, ft_mouse_zoom, &params);
-	mlx_hook(params.win, 2, 5, ft_fractol_hooks, &params);
-	mlx_hook(params.win, 6, 5, ft_mouse, &params);
-	mlx_hook(params.win, 17, 1L << 17, exit_x, &params);
-	mlx_loop(params.mlx);
+		calc_mandelbrot(&all_params, julia);
+	mlx_put_image_to_window(all_params.mlx, all_params.win, all_params.image, 0, 0);
+	mlx_mouse_hook(all_params.win, ft_mouse_zoom, &all_params);
+	mlx_hook(all_params.win, 2, 5, ft_fractol_hooks, &all_params);
+	mlx_hook(all_params.win, 6, 5, ft_mouse, &all_params);
+	mlx_hook(all_params.win, 17, 1L << 17, exit_x, &all_params);
+	mlx_loop(all_params.mlx);
 }
 
 
