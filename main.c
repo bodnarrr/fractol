@@ -27,7 +27,7 @@ int		ft_fractol_hooks(int key, t_fractol *params)
 	return (0);
 }
 
-double	ft_mandelbrot_iterations(double x, double y)
+int		ft_mandelbrot_iterations(double x, double y)
 {
 	int		i;
 	double	x_new;
@@ -43,11 +43,11 @@ double	ft_mandelbrot_iterations(double x, double y)
 		x_new = x * x;
 		y_new = y * y;
 		if (x_new + y_new > 4)
-			return ((double)i / 50);
+			return ((int)((double)i / MAX_ITER * 255));
 		y = 2 * x * y + y_saved;
 		x = x_new - y_new + x_saved;
 	}
-	return (1.0);
+	return (255);
 }
 
 double	ft_julia_iterations(double x, double y, t_fractol *params)
@@ -106,7 +106,7 @@ void	calc_mandelbrot(t_fractol *params, t_fractol_type type)
 		while (++j < WIDTH)
 		{
 			if (type == 0)
-				color = (int)(ft_mandelbrot_iterations(calc.min_real +
+				color = (ft_mandelbrot_iterations(calc.min_real +
 					j * calc.step_real, calc.min_img +
 					i * calc.step_img) * 255);
 			else if (type == 1)
@@ -141,6 +141,37 @@ int 	ft_mouse(int x, int y, t_fractol *params)
 	return (0);
 }
 
+void	thread_operation(t_calc *thread_info)
+{
+	int 	i;
+	int 	j;
+	int		k;
+	int 	channel;
+
+	thread_info->params->step_real =
+			(thread_info->params->max_real - thread_info->params->min_real) / WIDTH;
+	thread_info->params->step_img =
+			(thread_info->params->max_img - thread_info->params->min_img) / HEIGHT;
+	k = 0;
+	i = -1;
+	channel = 0;
+	while(++i < HEIGHT / THREADS)
+	{
+		j = -1;
+		while(++j < WIDTH)
+		{
+			if (thread_info->params->type == mand)
+				channel = ft_mandelbrot_iterations(thread_info->params->min_real + thread_info->params->step_real * j,
+												   thread_info->params->min_img + thread_info->params->step_img * i);
+			else if (thread_info->params->type == julia)
+				channel = ft_julia_iterations();
+			thread_info->params->image_src[thread_info->start_line * WIDTH + k] =
+					((channel << 16) | (channel << 8) | channel);
+		}
+	}
+
+}
+
 void	ft_make_threads(t_fractol *params)
 {
 	pthread_t	threads[THREADS];
@@ -148,13 +179,12 @@ void	ft_make_threads(t_fractol *params)
 	int 		i;
 
 	i = -1;
-	while (++i < HEIGHT)
+	while (++i < THREADS)
 	{
 		calculations[i].params = params;
-		calculations[i].start_pos = i * WIDTH;
-		calculations[i].conts_img = params->min_img + i * params->step_img;
+		calculations[i].start_line = (HEIGHT / THREADS) * i;
 		//TODO: some_func
-		pthread_create(&threads[i % THREADS], NULL, (void *(*)(void *))some_func, (void *)&calculations[i]);
+		pthread_create(&threads[i], NULL, (void *(*)(void *))thread_operation, (void *)&calculations[i]);
 	}
 }
 

@@ -60,7 +60,7 @@ typedef struct		s_fractol
 typedef struct	s_calc
 {
 	t_fractol	*params;
-	int 		start_pos;
+	int 		start_line;
 	double		conts_img;
 
 }				t_calc;
