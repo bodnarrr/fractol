@@ -12,6 +12,17 @@
 
 #include "fractol.h"
 
+int		exit_x(void *par);
+int		ft_fractol_hooks(int key, t_fractol *params);
+int		ft_mandelbrot_iterations(double x, double y);
+int		ft_julia_iterations(double x, double y, t_fractol *params);
+int 	ft_mouse_zoom(int key, int x, int y, t_fractol *params);
+int 	ft_mouse(int x, int y, t_fractol *params);
+void	thread_operation(t_calc *thread_info);
+void	ft_make_threads(t_fractol *params);
+void	init_fractol(t_fractol *params, char *str);
+bool	ft_incorrect_arg(char *str);
+
 int		exit_x(void *par)
 {
 	par = NULL;
@@ -50,7 +61,7 @@ int		ft_mandelbrot_iterations(double x, double y)
 	return (255);
 }
 
-double	ft_julia_iterations(double x, double y, t_fractol *params)
+int		ft_julia_iterations(double x, double y, t_fractol *params)
 {
 	int		i;
 	double	x_new;
@@ -62,40 +73,12 @@ double	ft_julia_iterations(double x, double y, t_fractol *params)
 		x_new = x * x;
 		y_new = y * y;
 		if (x_new + y_new > 4)
-			return ((double) i / 50);
+			return ((int) (((double) i / 50) * 255));
 		y = 2 * x * y + params->d_img_julia;
 		x = x_new - y_new + params->d_real_julia;
 	}
-	return (1.0);
+	return (255);
 }
-
-//void	calc_mandelbrot(t_fractol *params, t_fractol_type type)
-//{
-//	int							i;
-//	int							j;
-//	int							k;
-//	int							color;
-//
-//	i = -1;
-//	k = 0;
-//	color = 0;
-//	while (++i < HEIGHT)
-//	{
-//		j = -1;
-//		while (++j < WIDTH)
-//		{
-//			if (type == 0)
-//				color = (int)(ft_mandelbrot_iterations(params->min_real +
-//					j * params->step_real, params->min_img +
-//					i * params->step_img) * 255);
-//			else if (type == 1)
-//				color = (int)(ft_julia_iterations(params->min_real +
-//					j * params->step_real, params->min_img +
-//					i * params->step_img, params) * 255);
-//			params->image_src[k++] = ((color / 6) << 16) | (((color * 5) % 255) << 8) | ((color * 8) % 255);
-//		}
-//	}
-//}
 
 int 	ft_mouse_zoom(int key, int x, int y, t_fractol *params)
 {
@@ -109,13 +92,12 @@ int 	ft_mouse_zoom(int key, int x, int y, t_fractol *params)
 
 int 	ft_mouse(int x, int y, t_fractol *params)
 {
-	return (0);
 	if (params->is_julia == 1 && x > 0 && x < WIDTH && y > 0 && y < HEIGHT)
 	{
 		params->d_real_julia = -1.8 + (double)x / WIDTH * 2.4;
 		params->d_img_julia = -0.4 + (double)y / WIDTH * 2.0;
 		mlx_clear_window(params->mlx, params->win);
-//		calc_mandelbrot(params, julia);
+		ft_make_threads(params);
 		mlx_put_image_to_window(params->mlx, params->win, params->image, 0, 0);
 	}
 	return (0);
@@ -144,7 +126,9 @@ void	thread_operation(t_calc *thread_info)
 				channel = ft_mandelbrot_iterations(thread_info->params->min_real + thread_info->params->step_real * j,
 												   thread_info->params->min_img + thread_info->params->step_img * (i + thread_info->start_line));
 			else if (thread_info->params->type == julia)
-				(void)42;
+				channel = ft_julia_iterations(thread_info->params->min_real + thread_info->params->step_real * j,
+											  thread_info->params->min_img + thread_info->params->step_img * (i + thread_info->start_line),
+												thread_info->params);
 			int index = thread_info->start_line * WIDTH + k++;
 			thread_info->params->image_src[index] =
 					((channel << 16) | (channel << 8) | channel);
@@ -159,7 +143,6 @@ void	ft_make_threads(t_fractol *params)
 	int 		i;
 
 	i = -1;
-	ft_printf("Address of global params: %p\n", params);
 	while (++i < THREADS)
 	{
 		calculations[i].params = params;
