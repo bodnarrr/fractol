@@ -97,12 +97,10 @@ int		ft_mouse_zoom(int key, int x, int y, t_fractol *params)
 
 	real_position = params->min_real + (double)x * params->step_real;
 	img_position = params->min_img + (double)y * params->step_img;
-
 	if (key == ZOOM_IN)
 		apply_zoom(real_position, img_position, params, 1.1);
 	else if (key == ZOOM_OUT)
 		apply_zoom(real_position, img_position, params, 1 / 1.1);
-	//
 	mlx_clear_window(params->mlx, params->win);
 	ft_make_threads(params);
 	mlx_put_image_to_window(params->mlx, params->win, params->image, 0, 0);
@@ -152,7 +150,6 @@ void	thread_operation(t_calc *thread_info)
 					((channel << 16) | (channel << 8) | channel);
 		}
 	}
-	ft_printf("Thread with starting line %d finished\n", thread_info->start_line);
 }
 
 void	ft_make_threads(t_fractol *params)
@@ -169,8 +166,7 @@ void	ft_make_threads(t_fractol *params)
 		pthread_create(&threads[i], NULL, (void *(*)(void *))thread_operation, (void *)&calculations[i]);
 	}
 	while (--i >= 0)
-		pthread_join(threads[i], (void **) &params->for_threads);
-	ft_printf("HERE\n");
+		pthread_join(threads[i], (void **)&params->for_threads);
 }
 
 void	init_fractol(t_fractol *params, char *str)

@@ -26,12 +26,12 @@
 # define ZOOM_IN	4
 # define ZOOM_OUT	5
 
-typedef enum	e_fractol_type
+typedef enum		e_fractol_type
 {
 	mand = 0,
 	julia,
 	other,
-}				t_fractol_type;
+}					t_fractol_type;
 
 typedef struct		s_fractol
 {
@@ -42,30 +42,26 @@ typedef struct		s_fractol
 	int				bpp;
 	int				size_line;
 	int				endian;
-	int 			*for_threads;
+	int				*for_threads;
 	double			d_real_julia;
 	double			d_img_julia;
-	bool			is_julia;
-	t_fractol_type	type;
-
 	double			min_real;
 	double			max_real;
 	double			min_img;
 	double			max_img;
-
-	double 			step_real;
+	double			step_real;
 	double			step_img;
 	double			zoom;
 	double			shift_real;
 	double			shift_img;
+	t_fractol_type	type;
+	bool			is_julia;
 }					t_fractol;
 
-typedef struct	s_calc
+typedef struct		s_calc
 {
-	t_fractol	*params;
-	int 		start_line;
-}				t_calc;
-
-
+	t_fractol		*params;
+	int				start_line;
+}					t_calc;
 
 #endif
