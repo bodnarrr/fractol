@@ -16,12 +16,13 @@ int		exit_x(void *par);
 int		ft_fractol_hooks(int key, t_fractol *params);
 int		ft_mandelbrot_iterations(double x, double y);
 int		ft_julia_iterations(double x, double y, t_fractol *params);
-int 	ft_mouse_zoom(int key, int x, int y, t_fractol *params);
-int 	ft_mouse(int x, int y, t_fractol *params);
+int		ft_mouse_zoom(int key, int x, int y, t_fractol *params);
+int		ft_mouse(int x, int y, t_fractol *params);
 void	thread_operation(t_calc *thread_info);
 void	ft_make_threads(t_fractol *params);
 void	init_fractol(t_fractol *params, char *str);
 bool	ft_incorrect_arg(char *str);
+void	apply_zoom(double x, double y, t_fractol *params, double zoom_factor);
 
 int		exit_x(void *par)
 {
@@ -54,7 +55,7 @@ int		ft_mandelbrot_iterations(double x, double y)
 		x_new = x * x;
 		y_new = y * y;
 		if (x_new + y_new > 4)
-			return ((int) (((double) i / 50) * 255));
+			return ((int)(((double)i / 50) * 255));
 		y = 2 * x * y + y_saved;
 		x = x_new - y_new + x_saved;
 	}
@@ -73,24 +74,42 @@ int		ft_julia_iterations(double x, double y, t_fractol *params)
 		x_new = x * x;
 		y_new = y * y;
 		if (x_new + y_new > 4)
-			return ((int) (((double) i / 50) * 255));
+			return ((int)(((double)i / 50) * 255));
 		y = 2 * x * y + params->d_img_julia;
 		x = x_new - y_new + params->d_real_julia;
 	}
 	return (255);
 }
 
-int 	ft_mouse_zoom(int key, int x, int y, t_fractol *params)
+void	apply_zoom(double x, double y, t_fractol *params, double zoom_factor)
 {
-	(void)key;
-	(void)x;
-	(void)y;
-	(void)params;
-	ft_printf("Click!\n");
+	zoom_factor = 1.0 / zoom_factor;
+	params->min_real = x + ((params->min_real - x) * zoom_factor);
+	params->max_real = x + ((params->max_real - x) * zoom_factor);
+	params->min_img = y + ((params->min_img - y) * zoom_factor);
+	params->max_img = y + ((params->max_img - y) * zoom_factor);
+}
+
+int		ft_mouse_zoom(int key, int x, int y, t_fractol *params)
+{
+	double real_position;
+	double img_position;
+
+	real_position = params->min_real + (double)x * params->step_real;
+	img_position = params->min_img + (double)y * params->step_img;
+
+	if (key == ZOOM_IN)
+		apply_zoom(real_position, img_position, params, 1.1);
+	else if (key == ZOOM_OUT)
+		apply_zoom(real_position, img_position, params, 1 / 1.1);
+	//
+	mlx_clear_window(params->mlx, params->win);
+	ft_make_threads(params);
+	mlx_put_image_to_window(params->mlx, params->win, params->image, 0, 0);
 	return (0);
 }
 
-int 	ft_mouse(int x, int y, t_fractol *params)
+int		ft_mouse(int x, int y, t_fractol *params)
 {
 	if (params->is_julia == 1 && x > 0 && x < WIDTH && y > 0 && y < HEIGHT)
 	{
@@ -105,42 +124,42 @@ int 	ft_mouse(int x, int y, t_fractol *params)
 
 void	thread_operation(t_calc *thread_info)
 {
-	int 	i;
-	int 	j;
-	int		k;
-	int 	channel;
+	int		i;
+	int		j;
+	int		channel;
+	int		image_index;
 
 	thread_info->params->step_real =
 			(thread_info->params->max_real - thread_info->params->min_real) / (WIDTH - 1);
 	thread_info->params->step_img =
 			(thread_info->params->max_img - thread_info->params->min_img) / (HEIGHT - 1);
-	k = 0;
 	i = -1;
 	channel = 0;
-	while(++i < HEIGHT / THREADS)
+	image_index = thread_info->start_line * WIDTH;
+	while (++i < HEIGHT / THREADS)
 	{
 		j = -1;
-		while(++j < WIDTH)
+		while (++j < WIDTH)
 		{
 			if (thread_info->params->type == mand)
 				channel = ft_mandelbrot_iterations(thread_info->params->min_real + thread_info->params->step_real * j,
-												   thread_info->params->min_img + thread_info->params->step_img * (i + thread_info->start_line));
+				thread_info->params->min_img + thread_info->params->step_img * (i + thread_info->start_line));
 			else if (thread_info->params->type == julia)
 				channel = ft_julia_iterations(thread_info->params->min_real + thread_info->params->step_real * j,
-											  thread_info->params->min_img + thread_info->params->step_img * (i + thread_info->start_line),
-												thread_info->params);
-			int index = thread_info->start_line * WIDTH + k++;
-			thread_info->params->image_src[index] =
+				thread_info->params->min_img + thread_info->params->step_img * (i + thread_info->start_line),
+				thread_info->params);
+			thread_info->params->image_src[image_index++] =
 					((channel << 16) | (channel << 8) | channel);
 		}
 	}
+	ft_printf("Thread with starting line %d finished\n", thread_info->start_line);
 }
 
 void	ft_make_threads(t_fractol *params)
 {
 	pthread_t	threads[THREADS];
 	t_calc		calculations[THREADS];
-	int 		i;
+	int			i;
 
 	i = -1;
 	while (++i < THREADS)
@@ -149,9 +168,9 @@ void	ft_make_threads(t_fractol *params)
 		calculations[i].start_line = (HEIGHT / THREADS) * i;
 		pthread_create(&threads[i], NULL, (void *(*)(void *))thread_operation, (void *)&calculations[i]);
 	}
-	while (--i > 0)
-		pthread_join(threads[i], NULL);
-	mlx_put_image_to_window(params->mlx, params->win, params->image_src, 0, 0);
+	while (--i >= 0)
+		pthread_join(threads[i], (void **) &params->for_threads);
+	ft_printf("HERE\n");
 }
 
 void	init_fractol(t_fractol *params, char *str)
@@ -198,7 +217,6 @@ int		main(int ac, char **av)
 		return (0);
 	init_fractol(&all_params, av[1]);
 	ft_make_threads(&all_params);
-
 	mlx_put_image_to_window(all_params.mlx, all_params.win, all_params.image, 0, 0);
 	mlx_mouse_hook(all_params.win, ft_mouse_zoom, &all_params);
 	mlx_hook(all_params.win, 2, 5, ft_fractol_hooks, &all_params);
@@ -206,5 +224,3 @@ int		main(int ac, char **av)
 	mlx_hook(all_params.win, 17, 1L << 17, exit_x, &all_params);
 	mlx_loop(all_params.mlx);
 }
-
-

@@ -22,7 +22,9 @@
 # define WIDTH		800
 # define HEIGHT		800
 # define MAX_ITER	50
-# define THREADS 	4
+# define THREADS 	8
+# define ZOOM_IN	4
+# define ZOOM_OUT	5
 
 typedef enum	e_fractol_type
 {
@@ -40,6 +42,7 @@ typedef struct		s_fractol
 	int				bpp;
 	int				size_line;
 	int				endian;
+	int 			*for_threads;
 	double			d_real_julia;
 	double			d_img_julia;
 	bool			is_julia;
