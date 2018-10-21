@@ -4,7 +4,12 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
+  "/Users/abodnar/UNT/Projects/fractol/hooks.c" "/Users/abodnar/UNT/Projects/fractol/cmake-build-debug/CMakeFiles/fractol.dir/hooks.c.o"
+  "/Users/abodnar/UNT/Projects/fractol/init_functions.c" "/Users/abodnar/UNT/Projects/fractol/cmake-build-debug/CMakeFiles/fractol.dir/init_functions.c.o"
+  "/Users/abodnar/UNT/Projects/fractol/iteration_functions.c" "/Users/abodnar/UNT/Projects/fractol/cmake-build-debug/CMakeFiles/fractol.dir/iteration_functions.c.o"
   "/Users/abodnar/UNT/Projects/fractol/main.c" "/Users/abodnar/UNT/Projects/fractol/cmake-build-debug/CMakeFiles/fractol.dir/main.c.o"
+  "/Users/abodnar/UNT/Projects/fractol/more_hooks.c" "/Users/abodnar/UNT/Projects/fractol/cmake-build-debug/CMakeFiles/fractol.dir/more_hooks.c.o"
+  "/Users/abodnar/UNT/Projects/fractol/threads.c" "/Users/abodnar/UNT/Projects/fractol/cmake-build-debug/CMakeFiles/fractol.dir/threads.c.o"
   )
 set(CMAKE_C_COMPILER_ID "AppleClang")
 

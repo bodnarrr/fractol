@@ -17,6 +17,8 @@ stdbool.h
 -
 pthread.h
 -
+math.h
+-
 
 /Users/abodnar/UNT/Projects/fractol/libftprintf/libft/libft.h
 unistd.h
@@ -42,9 +44,9 @@ inttypes.h
 libft/libft.h
 /Users/abodnar/UNT/Projects/fractol/libftprintf/libft/libft.h
 
-/Users/abodnar/UNT/Projects/fractol/main.c
+/Users/abodnar/UNT/Projects/fractol/minilibx_macos/mlx.h
+
+/Users/abodnar/UNT/Projects/fractol/more_hooks.c
 fractol.h
 /Users/abodnar/UNT/Projects/fractol/fractol.h
-
-/Users/abodnar/UNT/Projects/fractol/minilibx_macos/mlx.h
 

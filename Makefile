@@ -16,7 +16,8 @@ LIB = libftprintf.a
 
 MLX = libmlx.a
 
-SRCS =	main.c
+SRCS =	main.c init_functions.c iteration_functions.c hooks.c threads.c \
+			more_hooks.c
 
 OBJECTS = $(SRCS:.c=.o)
 

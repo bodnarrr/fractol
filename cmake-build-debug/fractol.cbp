@@ -88,7 +88,22 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/abodnar/UNT/Projects/fractol/hooks.c">
+			<Option target="fractol"/>
+		</Unit>
+		<Unit filename="/Users/abodnar/UNT/Projects/fractol/init_functions.c">
+			<Option target="fractol"/>
+		</Unit>
+		<Unit filename="/Users/abodnar/UNT/Projects/fractol/iteration_functions.c">
+			<Option target="fractol"/>
+		</Unit>
 		<Unit filename="/Users/abodnar/UNT/Projects/fractol/main.c">
+			<Option target="fractol"/>
+		</Unit>
+		<Unit filename="/Users/abodnar/UNT/Projects/fractol/more_hooks.c">
+			<Option target="fractol"/>
+		</Unit>
+		<Unit filename="/Users/abodnar/UNT/Projects/fractol/threads.c">
 			<Option target="fractol"/>
 		</Unit>
 		<Unit filename="/Users/abodnar/UNT/Projects/fractol/CMakeLists.txt">
